@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>今日四问 · 清新日历</title>
+    <style>
+        /* ===== 全局重置 & 字体 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(145deg, #f5f0eb 0%, #e8e0d8 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            margin: 0;
+        }
+
+        /* ===== 主卡片 ===== */
+        .app {
+            background: rgba(255, 248, 242, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 28px 20px 32px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 
+                0 16px 48px rgba(160, 130, 110, 0.12),
+                0 4px 12px rgba(160, 130, 110, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 242, 235, 0.4);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            min-height: 480px;
+            position: relative;
+        }
+
+        /* ===== 头部 ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 14px;
+            border-bottom: 2px dashed rgba(190, 170, 155, 0.2);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .header h1 {
+            font-size: 19px;
+            font-weight: 600;
+            color: #4a3f38;
+            letter-spacing: 1px;
+        }
+
+        .header h1 .emoji {
+            margin-right: 6px;
+        }
+
+        .header .date-badge {
+            font-size: 12px;
+            color: #b09a8a;
+            background: rgba(210, 190, 175, 0.18);
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-weight: 450;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        /* ===== 问题列表 ===== */
+        .question-list {
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+            margin-bottom: 24px;
+        }
+
+        .question-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            background: rgba(255, 248, 242, 0.5);
+            border-radius: 60px;
+            border: 1.5px solid rgba(210, 190, 175, 0.18);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .question-item:active {
+            transform: scale(0.97);
+            background: rgba(255, 248, 242, 0.7);
+        }
+
+        .question-item:hover {
+            background: rgba(255, 248, 242, 0.7);
+            border-color: rgba(180, 160, 145, 0.25);
+        }
+
+        /* ===== 新复选框 — 紫粉渐变 ===== */
+        .check-ring {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            border-radius: 50%;
+            border: 2.5px solid #d5c4b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: transparent;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+
+        .check-ring.done {
+            border-color: #c9a8d4;
+            background: linear-gradient(135deg, #e8d5f0 0%, #d4b8e0 100%);
+            box-shadow: 0 4px 14px rgba(180, 140, 200, 0.3);
+        }
+
+        .check-ring.done::after {
+            content: "✓";
+            font-size: 17px;
+            font-weight: 600;
+            color: #8b6f9e;
+            animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.4); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .question-text {
+            font-size: 15px;
+            font-weight: 470;
+            color: #4a3f38;
+            transition: all 0.3s ease;
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .question-text.done {
+            color: #b09a8a;
+            text-decoration: line-through;
+            text-decoration-color: #cbb8aa;
+            text-decoration-thickness: 2px;
+        }
+
+        /* ===== 进度 & 状态 ===== */
+        .progress-area {
+            margin-bottom: 18px;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 5px;
+            background: rgba(210, 190, 175, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #d4b8e0, #c9a8d4);
+            border-radius: 12px;
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .status-text {
+            text-align: center;
+            font-size: 13.5px;
+            color: #b09a8a;
+            letter-spacing: 0.4px;
+            font-weight: 450;
+        }
+
+        .status-text .highlight {
+            color: #8b6f9e;
+            font-weight: 500;
+        }
+
+        .status-text .done-emoji {
+            font-size: 17px;
+        }
+
+        /* ===== 日历面板（初始隐藏，完成时淡入） ===== */
+        .calendar-panel {
+            margin-top: 4px;
+            padding-top: 18px;
+            border-top: 2px dashed rgba(190, 170, 155, 0.18);
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateY(12px);
+        }
+
+        .calendar-panel.open {
+            max-height: 600px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .calendar-header h2 {
+            font-size: 16px;
+            font-weight: 500;
+            color: #4a3f38;
+            letter-spacing: 0.5px;
+        }
+
+        .calendar-header .nav-group {
+            display: flex;
+            gap: 4px;
+        }
+
+        .calendar-header .nav-group button {
+            background: rgba(210, 190, 175, 0.12);
+            border: none;
+            padding: 4px 13px;
+            border-radius: 40px;
+            font-size: 12.5px;
+            cursor: pointer;
+            color: #6b5d52;
+            transition: all 0.2s ease;
+            font-weight: 450;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .calendar-header .nav-group button:active {
+            transform: scale(0.94);
+        }
+
+        .calendar-header .nav-group button:hover {
+            background: rgba(210, 190, 175, 0.22);
+        }
+
+        /* 日历网格 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+        }
+
+        .day-name {
+            font-size: 11.5px;
+            font-weight: 500;
+            color: #cbb8aa;
+            padding: 5px 0 8px 0;
+            letter-spacing: 0.3px;
+        }
+
+        .day-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 450;
+            color: #4a3f38;
+            background: rgba(255, 248, 242, 0.25);
+            transition: all 0.25s ease;
+            position: relative;
+            touch-action: manipulation;
+        }
+
+        .day-cell.empty {
+            background: transparent;
+        }
+
+        .day-cell.today {
+            border: 2px solid #c9a8d4;
+            background: rgba(210, 180, 220, 0.15);
+            font-weight: 550;
+        }
+
+        .day-cell.marked {
+            background: linear-gradient(135deg, #e8d5f0, #d4b8e0);
+            color: #6b4f7a;
+            font-weight: 550;
+            box-shadow: 0 2px 12px rgba(180, 140, 200, 0.2);
+        }
+
+        .day-cell.marked::after {
+            content: "✦";
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            font-size: 11px;
+            color: #b088c0;
+        }
+
+        /* ===== 底部按钮组 ===== */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .footer .btn-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .footer button {
+            background: transparent;
+            border: 1.5px solid rgba(210, 190, 175, 0.2);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 12.5px;
+            color: #b09a8a;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-weight: 450;
+            letter-spacing: 0.3px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            white-space: nowrap;
+        }
+
+        .footer button:active {
+            transform: scale(0.94);
+        }
+
+        .footer button:hover {
+            background: rgba(210, 190, 175, 0.08);
+            border-color: rgba(180, 160, 145, 0.35);
+            color: #6b5d52;
+        }
+
+        .footer .export-btn {
+            border-color: rgba(180, 140, 200, 0.3);
+            color: #8b6f9e;
+        }
+
+        .footer .export-btn:hover {
+            background: rgba(180, 140, 200, 0.08);
+            border-color: rgba(180, 140, 200, 0.5);
+            color: #6b4f7a;
+        }
+
+        /* ===== 导出数据弹窗 ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-box {
+            background: rgba(255, 248, 242, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 32px;
+            padding: 28px 24px 24px;
+            max-width: 440px;
+            width: 100%;
+            max-height: 80vh;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.12);
+            animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-box h2 {
+            font-size: 18px;
+            color: #4a3f38;
+            margin-bottom: 4px;
+        }
+
+        .modal-box .sub {
+            font-size: 13px;
+            color: #b09a8a;
+            margin-bottom: 16px;
+        }
+
+        .modal-box textarea {
+            width: 100%;
+            min-height: 200px;
+            max-height: 50vh;
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 1.5px solid rgba(210, 190, 175, 0.25);
+            background: rgba(255, 248, 242, 0.5);
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 13px;
+            color: #4a3f38;
+            resize: vertical;
+            outline: none;
+            transition: border 0.2s ease;
+            line-height: 1.6;
+        }
+
+        .modal-box textarea:focus {
+            border-color: #c9a8d4;
+        }
+
+        .modal-box .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .modal-box .modal-actions button {
+            padding: 8px 22px;
+            border-radius: 40px;
+            border: 1.5px solid rgba(210, 190, 175, 0.2);
+            background: transparent;
+            font-size: 14px;
+            font-weight: 450;
+            color: #6b5d52;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .modal-box .modal-actions button:active {
+            transform: scale(0.94);
+        }
+
+        .modal-box .modal-actions .btn-primary {
+            background: linear-gradient(135deg, #d4b8e0, #c9a8d4);
+            border-color: #c9a8d4;
+            color: white;
+        }
+
+        .modal-box .modal-actions .btn-primary:hover {
+            background: linear-gradient(135deg, #c9a8d4, #b898c4);
+            border-color: #b898c4;
+        }
+
+        .modal-box .modal-actions .btn-close {
+            border-color: rgba(210, 190, 175, 0.3);
+        }
+
+        .modal-box .modal-actions .btn-close:hover {
+            background: rgba(210, 190, 175, 0.08);
+        }
+
+        /* ===== 完成时的庆祝微动效 ===== */
+        .app.celebrate {
+            animation: gentleGlow 2s ease;
+        }
+
+        @keyframes gentleGlow {
+            0%, 100% { box-shadow: 0 16px 48px rgba(160, 130, 110, 0.12); }
+            50% { box-shadow: 0 16px 64px rgba(180, 140, 200, 0.2), 0 0 32px rgba(180, 140, 200, 0.04); }
+        }
+
+        /* ===== Toast 提示 ===== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: rgba(60, 50, 45, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: #f5f0eb;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-size: 14px;
+            font-weight: 450;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 2000;
+            pointer-events: none;
+            white-space: nowrap;
+            max-width: 90%;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ===== 响应式 - 小屏手机 ===== */
+        @media (max-width: 400px) {
+            .app {
+                padding: 20px 14px 24px;
+                border-radius: 28px;
+                min-height: 400px;
+            }
+            .header h1 {
+                font-size: 17px;
+            }
+            .header .date-badge {
+                font-size: 11px;
+                padding: 3px 12px;
+            }
+            .question-item {
+                padding: 12px 14px;
+                gap: 12px;
+            }
+            .question-text {
+                font-size: 14px;
+            }
+            .check-ring {
+                width: 26px;
+                height: 26px;
+                min-width: 26px;
+            }
+            .check-ring.done::after {
+                font-size: 15px;
+            }
+            .day-cell {
+                font-size: 13px;
+            }
+            .day-name {
+                font-size: 10.5px;
+            }
+            .calendar-header h2 {
+                font-size: 14px;
+            }
+            .calendar-header .nav-group button {
+                font-size: 11px;
+                padding: 3px 10px;
+            }
+            .status-text {
+                font-size: 12.5px;
+            }
+            .footer button {
+                font-size: 11.5px;
+                padding: 5px 12px;
+            }
+            .modal-box {
+                padding: 20px 16px 20px;
+                border-radius: 24px;
+            }
+            .modal-box textarea {
+                min-height: 150px;
+                font-size: 12px;
+            }
+            .toast {
+                font-size: 12px;
+                padding: 8px 18px;
+                bottom: 20px;
+            }
+        }
+
+        /* ===== 响应式 - 大屏手机/平板 ===== */
+        @media (min-width: 421px) and (max-width: 768px) {
+            .app {
+                padding: 32px 28px 36px;
+                max-width: 460px;
+            }
+            .question-item {
+                padding: 16px 22px;
+            }
+            .question-text {
+                font-size: 16px;
+            }
+            .check-ring {
+                width: 34px;
+                height: 34px;
+                min-width: 34px;
+            }
+        }
+
+        /* ===== 适配刘海屏/异形屏 ===== */
+        @supports (padding: max(0px)) {
+            .app {
+                padding-left: max(20px, env(safe-area-inset-left));
+                padding-right: max(20px, env(safe-area-inset-right));
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 导出数据弹窗 -->
+    <div class="modal-overlay" id="exportModal">
+        <div class="modal-box">
+            <h2>📤 导出数据</h2>
+            <p class="sub">📅 日期横排 · 完成状态 · 每月统计</p>
+            <textarea id="exportText" readonly></textarea>
+            <div class="modal-actions">
+                <button class="btn-close" onclick="closeModal()">关闭</button>
+                <button class="btn-primary" onclick="copyExportData()">📋 复制</button>
+                <button class="btn-primary" onclick="downloadExportData()">⬇️ 下载</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app" id="app">
+        <!-- 由 JavaScript 动态渲染 -->
+    </div>
+
+    <script>
+        // ============================================================
+        //  今日四问 · 导出格式横排 + 紫粉配色
+        // ============================================================
+
+        // -------- 工具 --------
+        function pad(n) { return String(n).padStart(2, '0'); }
+
+        function getTodayKey() {
+            const d = new Date();
+            return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+        }
+
+        function getMonthInfo(year, month) {
+            return {
+                firstDay: new Date(year, month, 1).getDay(),
+                daysInMonth: new Date(year, month + 1, 0).getDate()
+            };
+        }
+
+        const STORAGE_KEY = 'gentleDailyQuestV4';
+        const TODAY = getTodayKey();
+
+        // -------- Toast --------
+        let toastTimer = null;
+
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                el.classList.remove('show');
+            }, 2200);
+        }
+
+        // -------- 弹窗 --------
+        function openModal() {
+            const modal = document.getElementById('exportModal');
+            const textarea = document.getElementById('exportText');
+            const data = loadStore();
+
+            const keys = Object.keys(data).filter(k => k.match(/^\d{4}-\d{2}-\d{2}$/)).sort();
+
+            // 按年月分组
+            const monthMap = {};
+            keys.forEach(key => {
+                const ym = key.substring(0, 7);
+                if (!monthMap[ym]) monthMap[ym] = [];
+                monthMap[ym].push(key);
+            });
+
+            let lines = [];
+            lines.push('📋 今日四问 · 打卡记录');
+            lines.push('📅 导出: ' + new Date().toLocaleString());
+            lines.push('━'.repeat(36));
+            lines.push('');
+
+            const sortedMonths = Object.keys(monthMap).sort();
+            let totalDone = 0;
+            let totalDays = 0;
+
+            sortedMonths.forEach(ym => {
+                const dayKeys = monthMap[ym].sort();
+                const [year, month] = ym.split('-').map(Number);
+                const monthName = year + '年' + month + '月';
+                lines.push(`📆 ${monthName}`);
+
+                // ---- 横排显示日期 ----
+                let statusLine = '  ';
+                dayKeys.forEach(key => {
+                    const d = data[key];
+                    const done = d && d.q1 && d.q2 && d.q3 && d.q4;
+                    const dayNum = key.split('-')[2];
+                    const mark = done ? '✅' : '⬜';
+                    statusLine += dayNum + mark + ' ';
+                });
+                lines.push(statusLine.trim());
+
+                // 统计
+                let monthDone = 0;
+                dayKeys.forEach(key => {
+                    const d = data[key];
+                    if (d && d.q1 && d.q2 && d.q3 && d.q4) monthDone++;
+                });
+                const total = dayKeys.length;
+                const rate = total > 0 ? Math.round((monthDone / total) * 100) : 0;
+                lines.push(`  ── 完成 ${monthDone}/${total} 天 (${rate}%)`);
+                lines.push('');
+
+                totalDone += monthDone;
+                totalDays += total;
+            });
+
+            // 汇总
+            lines.push('━'.repeat(36));
+            const overallRate = totalDays > 0 ? Math.round((totalDone / totalDays) * 100) : 0;
+            lines.push(`📊 总计: ${totalDone}/${totalDays} 天完成 (${overallRate}%)`);
+            lines.push('');
+            lines.push('📌 数据存储于浏览器本地');
+
+            textarea.value = lines.join('\n');
+            modal.classList.add('active');
+            textarea.scrollTop = 0;
+        }
+
+        function closeModal() {
+            document.getElementById('exportModal').classList.remove('active');
+        }
+
+        document.getElementById('exportModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        function copyExportData() {
+            const textarea = document.getElementById('exportText');
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                showToast('✅ 已复制到剪贴板');
+            }).catch(() => {
+                textarea.select();
+                document.execCommand('copy');
+                showToast('✅ 已复制到剪贴板');
+            });
+        }
+
+        function downloadExportData() {
+            const textarea = document.getElementById('exportText');
+            const blob = new Blob([textarea.value], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            a.href = url;
+            a.download = `打卡记录_${TODAY}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('✅ 下载成功');
+        }
+
+        // -------- 数据 --------
+        function loadStore() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (!parsed[TODAY]) parsed[TODAY] = { q1: false, q2: false, q3: false, q4: false };
+                    return parsed;
+                }
+            } catch (_) { /* ignore */ }
+            return { [TODAY]: { q1: false, q2: false, q3: false, q4: false } };
+        }
+
+        function saveStore(store) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+        }
+
+        // -------- 状态 --------
+        let store = loadStore();
+        let viewYear = new Date().getFullYear();
+        let viewMonth = new Date().getMonth();
+
+        function getTodayData() {
+            return store[TODAY] || { q1: false, q2: false, q3: false, q4: false };
+        }
+
+        function allDone() {
+            const d = getTodayData();
+            return d.q1 && d.q2 && d.q3 && d.q4;
+        }
+
+        // -------- 渲染 --------
+        function render() {
+            const app = document.getElementById('app');
+            const todayData = getTodayData();
+            const done = allDone();
+
+            const total = 4;
+            const completed = (todayData.q1 ? 1 : 0) + (todayData.q2 ? 1 : 0) + (todayData.q3 ? 1 : 0) + (todayData.q4 ? 1 : 0);
+            const progress = (completed / total) * 100;
+
+            const { firstDay, daysInMonth } = getMonthInfo(viewYear, viewMonth);
+            const days = [];
+            for (let i = 0; i < firstDay; i++) days.push(null);
+            for (let d = 1; d <= daysInMonth; d++) {
+                const key = viewYear + '-' + pad(viewMonth + 1) + '-' + pad(d);
+                const isToday = key === TODAY;
+                const dayData = store[key];
+                const marked = dayData ? (dayData.q1 && dayData.q2 && dayData.q3 && dayData.q4) : false;
+                days.push({ date: d, key, isToday, marked });
+            }
+
+            const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+            const questions = [
+                { key: 'q1', label: '🌿 打八部金刚功了吗？' },
+                { key: 'q2', label: '👁️ 揉眼睛了吗？' },
+                { key: 'q3', label: '📖 学习了吗？' },
+                { key: 'q4', label: '💡 想赚钱方法了吗？' }
+            ];
+
+            let html = '';
+
+            html += `
+                <div class="header">
+                    <h1><span class="emoji">🌸</span> 今日四问</h1>
+                    <span class="date-badge">${TODAY}</span>
+                </div>
+            `;
+
+            html += `<div class="question-list">`;
+            questions.forEach(q => {
+                const checked = todayData[q.key] || false;
+                const ringClass = checked ? 'check-ring done' : 'check-ring';
+                const textClass = checked ? 'question-text done' : 'question-text';
+                html += `
+                    <div class="question-item" data-key="${q.key}">
+                        <div class="${ringClass}"></div>
+                        <span class="${textClass}">${q.label}</span>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+
+            const statusEmoji = done ? '🌼' : '🌱';
+            const statusMsg = done
+                ? '🎉 全部完成！日历已为你点亮 ✦'
+                : `完成 <span class="highlight">${Math.round(progress)}%</span> · 继续加油`;
+
+            html += `
+                <div class="progress-area">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${progress}%;"></div>
+                    </div>
+                    <div class="status-text">
+                        <span class="done-emoji">${statusEmoji}</span> ${statusMsg}
+                    </div>
+                </div>
+            `;
+
+            const panelOpenClass = done ? 'calendar-panel open' : 'calendar-panel';
+
+            html += `<div class="${panelOpenClass}">`;
+            html += `
+                <div class="calendar-header">
+                    <h2>📅 ${viewYear}年 ${monthNames[viewMonth]}</h2>
+                    <div class="nav-group">
+                        <button data-action="prev">‹</button>
+                        <button data-action="today">今天</button>
+                        <button data-action="next">›</button>
+                    </div>
+                </div>
+                <div class="grid">
+            `;
+
+            ['日', '一', '二', '三', '四', '五', '六'].forEach(w => {
+                html += `<div class="day-name">${w}</div>`;
+            });
+
+            days.forEach(cell => {
+                if (cell === null) {
+                    html += `<div class="day-cell empty"></div>`;
+                } else {
+                    let cls = 'day-cell';
+                    if (cell.isToday) cls += ' today';
+                    if (cell.marked) cls += ' marked';
+                    html += `<div class="${cls}">${cell.date}</div>`;
+                }
+            });
+
+            html += `</div>`;
+            html += `
+                <div class="footer">
+                    <div class="btn-group">
+                        <button data-action="reset">↻ 重置今日</button>
+                        <button class="export-btn" data-action="export">📤 导出数据</button>
+                    </div>
+                </div>
+            `;
+            html += `</div>`;
+
+            app.innerHTML = html;
+
+            if (done) {
+                app.classList.add('celebrate');
+            } else {
+                app.classList.remove('celebrate');
+            }
+
+            document.querySelectorAll('.question-item').forEach(el => {
+                el.removeEventListener('click', handleQuestion);
+                el.addEventListener('click', handleQuestion);
+            });
+
+            document.querySelectorAll('[data-action]').forEach(el => {
+                el.removeEventListener('click', handleAction);
+                el.addEventListener('click', handleAction);
+            });
+
+            saveStore(store);
+        }
+
+        // -------- 事件处理 --------
+        function handleQuestion(e) {
+            const el = e.currentTarget;
+            const key = el.dataset.key;
+            if (!key) return;
+            const today = store[TODAY] || { q1: false, q2: false, q3: false, q4: false };
+            today[key] = !today[key];
+            store[TODAY] = today;
+            render();
+        }
+
+        function handleAction(e) {
+            const action = e.currentTarget.dataset.action;
+            if (action === 'prev') {
+                if (viewMonth === 0) { viewYear--; viewMonth = 11; } else { viewMonth--; }
+                render();
+            } else if (action === 'next') {
+                if (viewMonth === 11) { viewYear++; viewMonth = 0; } else { viewMonth++; }
+                render();
+            } else if (action === 'today') {
+                const d = new Date();
+                viewYear = d.getFullYear();
+                viewMonth = d.getMonth();
+                render();
+            } else if (action === 'reset') {
+                store[TODAY] = { q1: false, q2: false, q3: false, q4: false };
+                render();
+                showToast('🔄 今日已重置');
+            } else if (action === 'export') {
+                openModal();
+            }
+        }
+
+        // -------- 启动 --------
+        render();
+        console.log('🌸 清新今日四问已启动');
+        console.log('📅 今日:', TODAY);
+    </script>
+</body>
+</html>
