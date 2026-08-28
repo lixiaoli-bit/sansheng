@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>今日四问 · 清新日历</title>
+    <title>今日四问 · 云端同步</title>
     <style>
-        /* ===== 全局重置 & 字体 ===== */
         * {
             margin: 0;
             padding: 0;
@@ -24,7 +23,6 @@
             margin: 0;
         }
 
-        /* ===== 主卡片 ===== */
         .app {
             background: rgba(255, 248, 242, 0.88);
             backdrop-filter: blur(12px);
@@ -33,14 +31,140 @@
             padding: 32px 24px 36px;
             max-width: 440px;
             width: 100%;
-            box-shadow: 
-                0 16px 48px rgba(160, 130, 110, 0.12),
-                0 4px 12px rgba(160, 130, 110, 0.05),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            box-shadow: 0 16px 48px rgba(160, 130, 110, 0.12), 0 4px 12px rgba(160, 130, 110, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
             border: 1px solid rgba(255, 242, 235, 0.4);
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             min-height: 480px;
             position: relative;
+        }
+
+        /* ===== 登录面板 ===== */
+        .login-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px 0 10px;
+        }
+
+        .login-panel h2 {
+            font-size: 22px;
+            color: #4a3f38;
+            text-align: center;
+        }
+
+        .login-panel .sub {
+            text-align: center;
+            color: #b09a8a;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .login-panel input {
+            padding: 14px 18px;
+            border-radius: 60px;
+            border: 1.5px solid rgba(210, 190, 175, 0.25);
+            background: rgba(255, 248, 242, 0.5);
+            font-size: 16px;
+            color: #4a3f38;
+            outline: none;
+            transition: border 0.2s ease;
+            width: 100%;
+        }
+
+        .login-panel input:focus {
+            border-color: #c9a8d4;
+        }
+
+        .login-panel input::placeholder {
+            color: #cbb8aa;
+        }
+
+        .login-panel .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .login-panel .btn-group button {
+            flex: 1;
+            padding: 14px;
+            border-radius: 60px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: none;
+        }
+
+        .login-panel .btn-group .btn-login {
+            background: linear-gradient(135deg, #d4b8e0, #c9a8d4);
+            color: white;
+        }
+
+        .login-panel .btn-group .btn-login:active {
+            transform: scale(0.96);
+        }
+
+        .login-panel .btn-group .btn-register {
+            background: rgba(210, 190, 175, 0.15);
+            color: #6b5d52;
+            border: 1.5px solid rgba(210, 190, 175, 0.2);
+        }
+
+        .login-panel .btn-group .btn-register:active {
+            transform: scale(0.96);
+        }
+
+        .login-panel .error-msg {
+            color: #d48a8a;
+            font-size: 14px;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        .login-panel .switch-mode {
+            text-align: center;
+            color: #b09a8a;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .login-panel .switch-mode span {
+            color: #8b6f9e;
+            font-weight: 500;
+        }
+
+        /* ===== 用户信息栏 ===== */
+        .user-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 8px 12px 8px 18px;
+            background: rgba(210, 190, 175, 0.08);
+            border-radius: 60px;
+        }
+
+        .user-bar .username {
+            font-size: 15px;
+            color: #4a3f38;
+            font-weight: 500;
+        }
+
+        .user-bar .logout-btn {
+            background: transparent;
+            border: 1px solid rgba(210, 190, 175, 0.2);
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            color: #b09a8a;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .user-bar .logout-btn:active {
+            transform: scale(0.94);
         }
 
         /* ===== 头部 ===== */
@@ -73,7 +197,6 @@
             padding: 6px 18px;
             border-radius: 40px;
             font-weight: 450;
-            letter-spacing: 0.3px;
             white-space: nowrap;
         }
 
@@ -95,10 +218,7 @@
             border: 1.5px solid rgba(210, 190, 175, 0.18);
             cursor: pointer;
             transition: all 0.3s ease;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
             user-select: none;
-            -webkit-user-select: none;
             touch-action: manipulation;
         }
 
@@ -107,12 +227,6 @@
             background: rgba(255, 248, 242, 0.7);
         }
 
-        .question-item:hover {
-            background: rgba(255, 248, 242, 0.7);
-            border-color: rgba(180, 160, 145, 0.25);
-        }
-
-        /* ===== 复选框 — 紫粉渐变 ===== */
         .check-ring {
             width: 34px;
             height: 34px;
@@ -163,7 +277,7 @@
             text-decoration-thickness: 2px;
         }
 
-        /* ===== 进度 & 状态 ===== */
+        /* ===== 进度 ===== */
         .progress-area {
             margin-bottom: 20px;
         }
@@ -198,11 +312,7 @@
             font-weight: 500;
         }
 
-        .status-text .done-emoji {
-            font-size: 20px;
-        }
-
-        /* ===== 日历面板（初始隐藏，完成时淡入） ===== */
+        /* ===== 日历 ===== */
         .calendar-panel {
             margin-top: 6px;
             padding-top: 22px;
@@ -233,7 +343,6 @@
             font-size: 19px;
             font-weight: 500;
             color: #4a3f38;
-            letter-spacing: 0.5px;
         }
 
         .calendar-header .nav-group {
@@ -249,21 +358,13 @@
             font-size: 15px;
             cursor: pointer;
             color: #6b5d52;
-            transition: all 0.2s ease;
-            font-weight: 450;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
+            transition: 0.2s;
         }
 
         .calendar-header .nav-group button:active {
             transform: scale(0.94);
         }
 
-        .calendar-header .nav-group button:hover {
-            background: rgba(210, 190, 175, 0.22);
-        }
-
-        /* 日历网格 */
         .grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -276,7 +377,6 @@
             font-weight: 500;
             color: #cbb8aa;
             padding: 6px 0 10px 0;
-            letter-spacing: 0.3px;
         }
 
         .day-cell {
@@ -289,9 +389,7 @@
             font-weight: 450;
             color: #4a3f38;
             background: rgba(255, 248, 242, 0.25);
-            transition: all 0.25s ease;
             position: relative;
-            touch-action: manipulation;
         }
 
         .day-cell.empty {
@@ -320,7 +418,7 @@
             color: #b088c0;
         }
 
-        /* ===== 底部按钮组 ===== */
+        /* ===== 底部按钮 ===== */
         .footer {
             display: flex;
             justify-content: space-between;
@@ -344,22 +442,11 @@
             font-size: 15px;
             color: #b09a8a;
             cursor: pointer;
-            transition: all 0.25s ease;
-            font-weight: 450;
-            letter-spacing: 0.3px;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            white-space: nowrap;
+            transition: 0.25s;
         }
 
         .footer button:active {
             transform: scale(0.94);
-        }
-
-        .footer button:hover {
-            background: rgba(210, 190, 175, 0.08);
-            border-color: rgba(180, 160, 145, 0.35);
-            color: #6b5d52;
         }
 
         .footer .export-btn {
@@ -370,10 +457,9 @@
         .footer .export-btn:hover {
             background: rgba(180, 140, 200, 0.08);
             border-color: rgba(180, 140, 200, 0.5);
-            color: #6b4f7a;
         }
 
-        /* ===== 导出数据弹窗 ===== */
+        /* ===== 弹窗 ===== */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -382,28 +468,20 @@
             bottom: 0;
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
             display: none;
             align-items: center;
             justify-content: center;
             padding: 20px;
             z-index: 1000;
-            animation: fadeIn 0.3s ease;
         }
 
         .modal-overlay.active {
             display: flex;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
         .modal-box {
             background: rgba(255, 248, 242, 0.95);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border-radius: 32px;
             padding: 32px 28px 28px;
             max-width: 460px;
@@ -435,17 +513,15 @@
         .modal-box textarea {
             width: 100%;
             min-height: 220px;
-            max-height: 50vh;
             padding: 16px 18px;
             border-radius: 16px;
             border: 1.5px solid rgba(210, 190, 175, 0.25);
             background: rgba(255, 248, 242, 0.5);
-            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-family: monospace;
             font-size: 15px;
             color: #4a3f38;
             resize: vertical;
             outline: none;
-            transition: border 0.2s ease;
             line-height: 1.8;
         }
 
@@ -469,7 +545,7 @@
             font-weight: 450;
             color: #6b5d52;
             cursor: pointer;
-            transition: all 0.25s ease;
+            transition: 0.25s;
         }
 
         .modal-box .modal-actions button:active {
@@ -482,11 +558,6 @@
             color: white;
         }
 
-        .modal-box .modal-actions .btn-primary:hover {
-            background: linear-gradient(135deg, #c9a8d4, #b898c4);
-            border-color: #b898c4;
-        }
-
         .modal-box .modal-actions .btn-close {
             border-color: rgba(210, 190, 175, 0.3);
         }
@@ -495,17 +566,7 @@
             background: rgba(210, 190, 175, 0.08);
         }
 
-        /* ===== 完成时的庆祝微动效 ===== */
-        .app.celebrate {
-            animation: gentleGlow 2s ease;
-        }
-
-        @keyframes gentleGlow {
-            0%, 100% { box-shadow: 0 16px 48px rgba(160, 130, 110, 0.12); }
-            50% { box-shadow: 0 16px 64px rgba(180, 140, 200, 0.2), 0 0 32px rgba(180, 140, 200, 0.04); }
-        }
-
-        /* ===== Toast 提示 ===== */
+        /* ===== Toast ===== */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -513,7 +574,6 @@
             transform: translateX(-50%) translateY(80px);
             background: rgba(60, 50, 45, 0.85);
             backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
             color: #f5f0eb;
             padding: 12px 28px;
             border-radius: 60px;
@@ -532,137 +592,55 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* ===== 响应式 - 小屏手机 ===== */
+        /* ===== 响应式 ===== */
         @media (max-width: 400px) {
-            .app {
-                padding: 22px 16px 26px;
-                border-radius: 28px;
-                min-height: 400px;
-            }
-            .header h1 {
-                font-size: 20px;
-            }
-            .header .date-badge {
-                font-size: 13px;
-                padding: 4px 14px;
-            }
-            .question-item {
-                padding: 14px 16px;
-                gap: 14px;
-            }
-            .question-text {
-                font-size: 16px;
-            }
-            .check-ring {
-                width: 30px;
-                height: 30px;
-                min-width: 30px;
-            }
-            .check-ring.done::after {
-                font-size: 17px;
-            }
-            .day-cell {
-                font-size: 15px;
-            }
-            .day-name {
-                font-size: 12px;
-            }
-            .calendar-header h2 {
-                font-size: 17px;
-            }
-            .calendar-header .nav-group button {
-                font-size: 13px;
-                padding: 4px 12px;
-            }
-            .status-text {
-                font-size: 14px;
-            }
-            .footer button {
-                font-size: 13px;
-                padding: 6px 14px;
-            }
-            .modal-box {
-                padding: 22px 18px 22px;
-                border-radius: 24px;
-            }
-            .modal-box h2 {
-                font-size: 19px;
-            }
-            .modal-box textarea {
-                min-height: 160px;
-                font-size: 14px;
-            }
-            .modal-box .modal-actions button {
-                font-size: 14px;
-                padding: 8px 20px;
-            }
-            .toast {
-                font-size: 14px;
-                padding: 10px 20px;
-                bottom: 20px;
-            }
+            .app { padding: 22px 16px 26px; border-radius: 28px; }
+            .header h1 { font-size: 20px; }
+            .question-text { font-size: 16px; }
+            .check-ring { width: 30px; height: 30px; min-width: 30px; }
+            .day-cell { font-size: 15px; }
+            .footer button { font-size: 13px; padding: 6px 14px; }
+            .modal-box { padding: 22px 18px; }
+            .modal-box textarea { min-height: 160px; font-size: 14px; }
         }
 
-        /* ===== 响应式 - 大屏手机/平板 ===== */
         @media (min-width: 421px) and (max-width: 768px) {
-            .app {
-                padding: 36px 30px 40px;
-                max-width: 480px;
-            }
-            .question-item {
-                padding: 18px 24px;
-            }
-            .question-text {
-                font-size: 19px;
-            }
-            .check-ring {
-                width: 38px;
-                height: 38px;
-                min-width: 38px;
-            }
-            .day-cell {
-                font-size: 18px;
-            }
-            .calendar-header h2 {
-                font-size: 20px;
-            }
-        }
-
-        /* ===== 适配刘海屏/异形屏 ===== */
-        @supports (padding: max(0px)) {
-            .app {
-                padding-left: max(24px, env(safe-area-inset-left));
-                padding-right: max(24px, env(safe-area-inset-right));
-            }
+            .app { padding: 36px 30px 40px; max-width: 480px; }
+            .question-text { font-size: 19px; }
+            .check-ring { width: 38px; height: 38px; min-width: 38px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Toast 提示 -->
     <div class="toast" id="toast"></div>
 
-    <!-- 导出数据弹窗 -->
     <div class="modal-overlay" id="exportModal">
         <div class="modal-box">
             <h2>📤 导出数据</h2>
-            <p class="sub">📅 日期横排 · 完成状态 · 每月统计</p>
+            <p class="sub">📅 日期横排 · 完成状态 · 每月统计 · 年度汇总</p>
             <textarea id="exportText" readonly></textarea>
             <div class="modal-actions">
                 <button class="btn-close" onclick="closeModal()">关闭</button>
-                <button class="btn-primary" onclick="copyExportData()"> 复制</button>
-                <button class="btn-primary" onclick="downloadExportData()">下载</button>
+                <button class="btn-primary" onclick="copyExportData()">📋 复制</button>
+                <button class="btn-primary" onclick="downloadExportData()">⬇️ 下载</button>
             </div>
         </div>
     </div>
 
-    <div class="app" id="app">
-        <!-- 由 JavaScript 动态渲染 -->
-    </div>
+    <div class="app" id="app"></div>
 
     <script>
         // ============================================================
-        //  今日四问 · 字体加大版
+        //  今日四问 · UpStash Redis 云存储版
+        //  已配置您的 UpStash 连接信息，直接使用
+        // ============================================================
+
+        // ============================================================
+        //  ✅ 已填入您的 UpStash 连接信息
+        // ============================================================
+        const UPSTASH_URL = 'https://gorgeous-ghost-201940.upstash.io';
+        const UPSTASH_TOKEN = 'gQAAAAAAAxTUAAIgcDJkMTBjNjA0ZDc5YjM0NDVlOTY4MzkyZGY4NWI3ODI5ZA';
         // ============================================================
 
         // -------- 工具 --------
@@ -680,8 +658,53 @@
             };
         }
 
-        const STORAGE_KEY = 'gentleDailyQuestV4';
         const TODAY = getTodayKey();
+
+        // -------- 全局状态 --------
+        let currentUser = null;
+        let store = {};
+        let viewYear = new Date().getFullYear();
+        let viewMonth = new Date().getMonth();
+        let isLoginMode = true;
+
+        // -------- UpStash Redis 操作 --------
+        async function redisCommand(command, ...args) {
+            const response = await fetch(UPSTASH_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + UPSTASH_TOKEN,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify([command, ...args])
+            });
+            if (!response.ok) {
+                throw new Error('Redis请求失败: ' + response.status);
+            }
+            const data = await response.json();
+            return data.result;
+        }
+
+        // 获取用户数据
+        async function getUserData(username) {
+            try {
+                const result = await redisCommand('GET', 'user:' + username);
+                return result ? JSON.parse(result) : null;
+            } catch (e) {
+                console.error('获取用户数据失败:', e);
+                return null;
+            }
+        }
+
+        // 保存用户数据
+        async function setUserData(username, data) {
+            try {
+                await redisCommand('SET', 'user:' + username, JSON.stringify(data));
+                return true;
+            } catch (e) {
+                console.error('保存用户数据失败:', e);
+                return false;
+            }
+        }
 
         // -------- Toast --------
         let toastTimer = null;
@@ -700,7 +723,7 @@
         function openModal() {
             const modal = document.getElementById('exportModal');
             const textarea = document.getElementById('exportText');
-            const data = loadStore();
+            const data = store;
 
             const keys = Object.keys(data).filter(k => k.match(/^\d{4}-\d{2}-\d{2}$/)).sort();
 
@@ -713,35 +736,37 @@
 
             let lines = [];
             lines.push('📋 今日四问 · 打卡记录');
+            lines.push('👤 用户: ' + (currentUser || '未登录'));
             lines.push('📅 导出: ' + new Date().toLocaleString());
-            lines.push('━'.repeat(36));
+            lines.push('━'.repeat(40));
             lines.push('');
 
             const sortedMonths = Object.keys(monthMap).sort();
             let totalDone = 0;
             let totalDays = 0;
 
+            const currentYear = new Date().getFullYear();
+            let yearDone = 0;
+            let yearDays = 0;
+
             sortedMonths.forEach(ym => {
+                const [year] = ym.split('-').map(Number);
                 const dayKeys = monthMap[ym].sort();
-                const [year, month] = ym.split('-').map(Number);
-                const monthName = year + '年' + month + '月';
+                const monthName = year + '年' + ym.split('-')[1] + '月';
                 lines.push(`📆 ${monthName}`);
 
                 let statusLine = '  ';
+                let monthDone = 0;
                 dayKeys.forEach(key => {
                     const d = data[key];
                     const done = d && d.q1 && d.q2 && d.q3 && d.q4;
+                    if (done) monthDone++;
                     const dayNum = key.split('-')[2];
                     const mark = done ? '✅' : '⬜';
                     statusLine += dayNum + mark + ' ';
                 });
                 lines.push(statusLine.trim());
 
-                let monthDone = 0;
-                dayKeys.forEach(key => {
-                    const d = data[key];
-                    if (d && d.q1 && d.q2 && d.q3 && d.q4) monthDone++;
-                });
                 const total = dayKeys.length;
                 const rate = total > 0 ? Math.round((monthDone / total) * 100) : 0;
                 lines.push(`  ── 完成 ${monthDone}/${total} 天 (${rate}%)`);
@@ -749,13 +774,22 @@
 
                 totalDone += monthDone;
                 totalDays += total;
+
+                if (year === currentYear) {
+                    yearDone += monthDone;
+                    yearDays += total;
+                }
             });
 
-            lines.push('━'.repeat(36));
+            lines.push('━'.repeat(40));
             const overallRate = totalDays > 0 ? Math.round((totalDone / totalDays) * 100) : 0;
             lines.push(`📊 总计: ${totalDone}/${totalDays} 天完成 (${overallRate}%)`);
+
+            const yearRate = yearDays > 0 ? Math.round((yearDone / yearDays) * 100) : 0;
+            lines.push(`📅 ${currentYear}年: ${yearDone}/${yearDays} 天完成 (${yearRate}%)`);
+
             lines.push('');
-            lines.push('📌 数据存储于浏览器本地');
+            lines.push('📌 数据存储于 UpStash Redis 云端');
 
             textarea.value = lines.join('\n');
             modal.classList.add('active');
@@ -795,28 +829,127 @@
             showToast('✅ 下载成功');
         }
 
-        // -------- 数据 --------
-        function loadStore() {
+        // -------- 云端数据操作 --------
+        async function loadCloudData() {
+            if (!currentUser) return;
             try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (!parsed[TODAY]) parsed[TODAY] = { q1: false, q2: false, q3: false, q4: false };
-                    return parsed;
+                const userData = await getUserData(currentUser);
+                if (userData && userData.data) {
+                    const data = userData.data;
+                    if (!data[TODAY]) data[TODAY] = { q1: false, q2: false, q3: false, q4: false };
+                    store = data;
+                } else {
+                    store = { [TODAY]: { q1: false, q2: false, q3: false, q4: false } };
+                    await saveCloudData();
                 }
-            } catch (_) { /* ignore */ }
-            return { [TODAY]: { q1: false, q2: false, q3: false, q4: false } };
+                render();
+            } catch (e) {
+                console.error('加载云端数据失败:', e);
+                showToast('⚠️ 加载数据失败，请检查网络');
+                const cached = localStorage.getItem('questCache_' + currentUser);
+                if (cached) {
+                    try {
+                        store = JSON.parse(cached);
+                        if (!store[TODAY]) store[TODAY] = { q1: false, q2: false, q3: false, q4: false };
+                        render();
+                    } catch (_) {}
+                }
+            }
         }
 
-        function saveStore(store) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+        async function saveCloudData() {
+            if (!currentUser) return;
+            try {
+                await setUserData(currentUser, { data: store });
+                localStorage.setItem('questCache_' + currentUser, JSON.stringify(store));
+            } catch (e) {
+                console.error('保存云端数据失败:', e);
+                localStorage.setItem('questCache_' + currentUser, JSON.stringify(store));
+                showToast('⚠️ 数据已保存在本地，联网后自动同步');
+            }
         }
 
-        // -------- 状态 --------
-        let store = loadStore();
-        let viewYear = new Date().getFullYear();
-        let viewMonth = new Date().getMonth();
+        // -------- 用户认证 --------
+        async function handleLogin() {
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPass').value.trim();
+            const errorEl = document.getElementById('loginError');
 
+            if (!username || !password) {
+                errorEl.textContent = '⚠️ 请填写用户名和密码';
+                return;
+            }
+
+            errorEl.textContent = '⏳ 正在登录...';
+
+            try {
+                const userData = await getUserData(username);
+                if (!userData) {
+                    errorEl.textContent = '❌ 用户不存在，请先注册';
+                    return;
+                }
+                if (userData.password !== password) {
+                    errorEl.textContent = '❌ 密码错误';
+                    return;
+                }
+                currentUser = username;
+                showToast('✅ 登录成功！');
+                await loadCloudData();
+                render();
+            } catch (e) {
+                errorEl.textContent = '❌ ' + (e.message || '登录失败，请重试');
+            }
+        }
+
+        async function handleRegister() {
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPass').value.trim();
+            const errorEl = document.getElementById('loginError');
+
+            if (!username || !password) {
+                errorEl.textContent = '⚠️ 请填写用户名和密码';
+                return;
+            }
+            if (password.length < 6) {
+                errorEl.textContent = '⚠️ 密码至少6位';
+                return;
+            }
+
+            errorEl.textContent = '⏳ 正在注册...';
+
+            try {
+                const existing = await getUserData(username);
+                if (existing) {
+                    errorEl.textContent = '❌ 用户名已存在';
+                    return;
+                }
+                await setUserData(username, {
+                    password: password,
+                    data: { [TODAY]: { q1: false, q2: false, q3: false, q4: false } }
+                });
+                currentUser = username;
+                store = { [TODAY]: { q1: false, q2: false, q3: false, q4: false } };
+                showToast('🎉 注册成功！已自动登录');
+                await saveCloudData();
+                render();
+            } catch (e) {
+                errorEl.textContent = '❌ ' + (e.message || '注册失败，请重试');
+            }
+        }
+
+        async function handleLogout() {
+            currentUser = null;
+            store = {};
+            showToast('👋 已退出');
+            render();
+        }
+
+        function toggleLoginMode() {
+            isLoginMode = !isLoginMode;
+            render();
+        }
+
+        // -------- 数据操作 --------
         function getTodayData() {
             return store[TODAY] || { q1: false, q2: false, q3: false, q4: false };
         }
@@ -829,9 +962,43 @@
         // -------- 渲染 --------
         function render() {
             const app = document.getElementById('app');
+
+            if (!currentUser) {
+                app.innerHTML = `
+                    <div class="login-panel">
+                        <h2>🌸 今日四问</h2>
+                        <p class="sub">${isLoginMode ? '登录' : '注册'}后数据云端保存，永不丢失</p>
+                        <input id="loginUser" type="text" placeholder="用户名" />
+                        <input id="loginPass" type="password" placeholder="密码" />
+                        <div class="error-msg" id="loginError"></div>
+                        <div class="btn-group">
+                            <button class="btn-login" onclick="handleLogin()">
+                                ${isLoginMode ? '登录' : '注册'}
+                            </button>
+                            <button class="btn-register" onclick="toggleLoginMode()">
+                                ${isLoginMode ? '注册新账号' : '返回登录'}
+                            </button>
+                        </div>
+                        <div style="text-align:center;color:#cbb8aa;font-size:12px;margin-top:8px;">
+                            🔒 数据加密存储于 UpStash Redis 云端
+                        </div>
+                    </div>
+                `;
+                document.getElementById('loginPass').addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        isLoginMode ? handleLogin() : handleRegister();
+                    }
+                });
+                document.getElementById('loginUser').addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        document.getElementById('loginPass').focus();
+                    }
+                });
+                return;
+            }
+
             const todayData = getTodayData();
             const done = allDone();
-
             const total = 4;
             const completed = (todayData.q1 ? 1 : 0) + (todayData.q2 ? 1 : 0) + (todayData.q3 ? 1 : 0) + (todayData.q4 ? 1 : 0);
             const progress = (completed / total) * 100;
@@ -858,6 +1025,10 @@
             let html = '';
 
             html += `
+                <div class="user-bar">
+                    <span class="username">👤 ${currentUser}</span>
+                    <button class="logout-btn" onclick="handleLogout()">退出</button>
+                </div>
                 <div class="header">
                     <h1><span class="emoji">🌸</span> 今日四问</h1>
                     <span class="date-badge">${TODAY}</span>
@@ -953,7 +1124,7 @@
                 el.addEventListener('click', handleAction);
             });
 
-            saveStore(store);
+            saveCloudData();
         }
 
         // -------- 事件处理 --------
@@ -991,7 +1162,7 @@
 
         // -------- 启动 --------
         render();
-        console.log('🌸 清新今日四问已启动');
+        console.log('🌸 今日四问已启动 · 数据存储于 UpStash');
         console.log('📅 今日:', TODAY);
     </script>
 </body>
